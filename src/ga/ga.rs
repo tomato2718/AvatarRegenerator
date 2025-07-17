@@ -116,15 +116,19 @@ mod test {
 
     #[test]
     fn execute_given_population_should_return_evolved_generation() {
-        let population: [FakeDataType; 2] = vec![
-            vec![0, 0, 5, 5].try_into().unwrap(),
-            vec![8, 8, 0, 0].try_into().unwrap(),
+        let population: [FakeDataType; 4] = vec![
+            vec![5, 5, 0, 0].try_into().unwrap(),
+            vec![0, 0, 3, 3].try_into().unwrap(),
+            vec![4, 5, 6, 7].try_into().unwrap(),
+            vec![5, 6, 7, 8].try_into().unwrap(),
         ]
         .try_into()
         .unwrap();
-        let mut expect: [FakeDataType; 2] = vec![
-            vec![0, 0, 5, 5].try_into().unwrap(),
+        let mut expect: [FakeDataType; 4] = vec![
             vec![0, 0, 0, 0].try_into().unwrap(),
+            vec![0, 0, 3, 3].try_into().unwrap(),
+            vec![5, 5, 0, 0].try_into().unwrap(),
+            vec![4, 5, 6, 7].try_into().unwrap(),
         ]
         .try_into()
         .unwrap();
