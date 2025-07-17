@@ -43,10 +43,7 @@ impl<DataType: Copy> GeneticAlgorithm<DataType> {
             let (a, b) = (heap.pop().unwrap(), heap.pop().unwrap());
             let child = self
                 .try_crossover(&population[a.1], &population[b.1])
-                .and_then(|mut child| {
-                    self.try_mutate(&mut child);
-                    Some(child)
-                });
+                .and_then(|mut child| Some(*self.try_mutate(&mut child)));
             if let Some(c) = child {
                 let score = (self.calculate_fitness)(&c) ^ 0xff;
                 processed.push((score, population.len()));
