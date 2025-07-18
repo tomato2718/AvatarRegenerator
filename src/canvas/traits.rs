@@ -1,8 +1,6 @@
 use image::DynamicImage;
 
 pub trait Shape {
-    fn crossover(shape: &impl Shape) -> Self;
-
     fn color(&self) -> [u8; 4];
 
     fn center(&self) -> [u32; 2];
