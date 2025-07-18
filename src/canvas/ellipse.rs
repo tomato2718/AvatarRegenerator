@@ -4,14 +4,14 @@ use imageproc::drawing::draw_filled_ellipse_mut;
 
 pub struct Ellipse {
     center: (i32, i32),
-    width: i32,
-    height: i32,
+    width: u32,
+    height: u32,
     z_index: u32,
     color: [u8; 4],
 }
 
 impl Ellipse {
-    pub fn new(center: (i32, i32), width: i32, height: i32, z_index: u32, color: [u8; 4]) -> Self {
+    pub fn new(center: (i32, i32), width: u32, height: u32, z_index: u32, color: [u8; 4]) -> Self {
         Ellipse {
             center,
             width,
@@ -31,11 +31,11 @@ impl Shape for Ellipse {
         self.center
     }
 
-    fn width(&self) -> i32 {
+    fn width(&self) -> u32 {
         self.width
     }
 
-    fn height(&self) -> i32 {
+    fn height(&self) -> u32 {
         self.height
     }
 
@@ -49,8 +49,8 @@ impl Placeable for Ellipse {
         draw_filled_ellipse_mut(
             image,
             self.center,
-            self.width / 2,
-            self.height / 2,
+            (self.width / 2).try_into().unwrap(),
+            (self.height / 2).try_into().unwrap(),
             Rgba(self.color),
         );
     }

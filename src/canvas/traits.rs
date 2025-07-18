@@ -5,9 +5,9 @@ pub trait Shape {
 
     fn center(&self) -> (i32, i32);
 
-    fn width(&self) -> i32;
+    fn width(&self) -> u32;
 
-    fn height(&self) -> i32;
+    fn height(&self) -> u32;
 
     fn z_index(&self) -> u32;
 }
