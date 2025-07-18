@@ -49,8 +49,8 @@ impl Placeable for Ellipse {
         draw_filled_ellipse_mut(
             image,
             self.center,
-            (self.width / 2).try_into().unwrap(),
-            (self.height / 2).try_into().unwrap(),
+            (self.width / 2) as i32,
+            (self.height / 2) as i32,
             Rgba(self.color),
         );
     }
