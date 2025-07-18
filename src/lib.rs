@@ -1,4 +1,5 @@
 mod args;
+mod canvas;
 mod core;
 mod ga;
 
