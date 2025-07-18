@@ -1,5 +1,5 @@
 use super::traits::Placeable;
-use image::{ColorType, DynamicImage, GenericImageView};
+use image::{ColorType, DynamicImage, GenericImageView, ImageFormat};
 
 pub struct Canvas {
     image: DynamicImage,
@@ -18,6 +18,10 @@ impl Canvas {
 
     pub fn draw(&mut self, shape: &impl Placeable) {
         shape.place(&mut self.image);
+    }
+
+    pub fn save(&self, path: &str) {
+        self.image.save_with_format(path, ImageFormat::Png).unwrap();
     }
 }
 
