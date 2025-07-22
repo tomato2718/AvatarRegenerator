@@ -1,4 +1,4 @@
-use super::traits::{Placeable, Shape};
+use super::traits::{Placeable, PlaceableShape, Shape};
 use image::Rgba;
 use imageproc::{drawing::draw_filled_rect_mut, rect::Rect};
 
@@ -21,6 +21,8 @@ impl Rectangle {
         }
     }
 }
+
+impl PlaceableShape for Rectangle {}
 
 impl Shape for Rectangle {
     fn color(&self) -> [u8; 4] {

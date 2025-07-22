@@ -16,7 +16,7 @@ impl Canvas {
         self.image.get_pixel(x, y).0
     }
 
-    pub fn draw(&mut self, shape: &impl Placeable) {
+    pub fn draw(&mut self, shape: &dyn Placeable) {
         shape.place(&mut self.image);
     }
 

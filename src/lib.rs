@@ -2,7 +2,6 @@ mod args;
 mod canvas;
 mod core;
 mod ga;
+mod shape;
 
-pub fn run() {
-    let _ = args::parse_args();
-}
+pub use core::run;

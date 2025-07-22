@@ -1,4 +1,4 @@
-use super::traits::{Placeable, Shape};
+use super::traits::{Placeable, PlaceableShape, Shape};
 use image::Rgba;
 use imageproc::drawing::draw_filled_ellipse_mut;
 
@@ -21,6 +21,8 @@ impl Ellipse {
         }
     }
 }
+
+impl PlaceableShape for Ellipse {}
 
 impl Shape for Ellipse {
     fn color(&self) -> [u8; 4] {
