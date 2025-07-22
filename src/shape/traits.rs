@@ -11,7 +11,3 @@ pub trait Shape {
 
     fn z_index(&self) -> u32;
 }
-
-pub trait GaShape: Shape + Placeable {
-    fn as_placeable(&self) -> &dyn Placeable;
-}

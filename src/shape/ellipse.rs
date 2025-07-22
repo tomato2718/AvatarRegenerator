@@ -1,7 +1,8 @@
-use super::traits::{GaShape, Placeable, Shape};
+use super::traits::{Placeable, Shape};
 use image::Rgba;
 use imageproc::drawing::draw_filled_ellipse_mut;
 
+#[derive(Clone, Copy)]
 pub struct Ellipse {
     center: (i32, i32),
     width: u32,
@@ -53,11 +54,5 @@ impl Placeable for Ellipse {
             (self.height / 2) as i32,
             Rgba(self.color),
         );
-    }
-}
-
-impl GaShape for Ellipse {
-    fn as_placeable(&self) -> &dyn Placeable {
-        self
     }
 }

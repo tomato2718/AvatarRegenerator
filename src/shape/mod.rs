@@ -1,7 +1,9 @@
 mod ellipse;
-mod random;
 mod rectangle;
+mod shape;
 mod traits;
 
-pub use random::random_shape;
-pub use traits::GaShape;
+pub use ellipse::Ellipse;
+pub use rectangle::Rectangle;
+pub use shape::GaShape;
+pub use traits::{Placeable, Shape};
