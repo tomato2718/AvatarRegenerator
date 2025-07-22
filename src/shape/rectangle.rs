@@ -22,7 +22,11 @@ impl Rectangle {
     }
 }
 
-impl PlaceableShape for Rectangle {}
+impl PlaceableShape for Rectangle {
+    fn as_placeable(&self) -> &dyn Placeable {
+        self
+    }
+}
 
 impl Shape for Rectangle {
     fn color(&self) -> [u8; 4] {

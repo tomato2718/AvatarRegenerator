@@ -12,4 +12,6 @@ pub trait Shape {
     fn z_index(&self) -> u32;
 }
 
-pub trait PlaceableShape: Shape + Placeable {}
+pub trait PlaceableShape: Shape + Placeable {
+    fn as_placeable(&self) -> &dyn Placeable;
+}

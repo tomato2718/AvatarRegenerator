@@ -22,7 +22,11 @@ impl Ellipse {
     }
 }
 
-impl PlaceableShape for Ellipse {}
+impl PlaceableShape for Ellipse {
+    fn as_placeable(&self) -> &dyn Placeable {
+        self
+    }
+}
 
 impl Shape for Ellipse {
     fn color(&self) -> [u8; 4] {
