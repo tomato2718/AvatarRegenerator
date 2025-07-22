@@ -15,8 +15,8 @@ fn random_ellipse(boundary: (u32, u32)) -> Ellipse {
             (random::<u32>() % boundary.0) as i32,
             (random::<u32>() % boundary.1) as i32,
         ),
-        random::<u32>() & 0x3f,
-        random::<u32>() & 0x3f,
+        (random::<u32>() & 0xff) + 1,
+        (random::<u32>() & 0xff) + 1,
         random(),
         [random(), random(), random(), random()],
     )
@@ -28,8 +28,8 @@ fn random_rect(boundary: (u32, u32)) -> Rectangle {
             (random::<u32>() % boundary.0) as i32,
             (random::<u32>() % boundary.1) as i32,
         ),
-        random::<u32>() & 0x3f,
-        random::<u32>() & 0x3f,
+        (random::<u32>() & 0xff) + 1,
+        (random::<u32>() & 0xff) + 1,
         random(),
         [random(), random(), random(), random()],
     )
