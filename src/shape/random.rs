@@ -1,9 +1,9 @@
-use super::{ellipse::Ellipse, rectangle::Rectangle, traits::PlaceableShape};
+use super::{ellipse::Ellipse, rectangle::Rectangle, traits::GaShape};
 use rand::random;
 
 const shape_size: u32 = 0x7f;
 
-pub fn random_shape(boundary: (u32, u32)) -> Box<dyn PlaceableShape> {
+pub fn random_shape(boundary: (u32, u32)) -> Box<dyn GaShape> {
     if (random::<u8>() & 0x1) == 1 {
         Box::new(random_ellipse(boundary))
     } else {

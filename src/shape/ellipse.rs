@@ -1,4 +1,4 @@
-use super::traits::{Placeable, PlaceableShape, Shape};
+use super::traits::{GaShape, Placeable, Shape};
 use image::Rgba;
 use imageproc::drawing::draw_filled_ellipse_mut;
 
@@ -19,12 +19,6 @@ impl Ellipse {
             z_index,
             color,
         }
-    }
-}
-
-impl PlaceableShape for Ellipse {
-    fn as_placeable(&self) -> &dyn Placeable {
-        self
     }
 }
 
@@ -59,5 +53,11 @@ impl Placeable for Ellipse {
             (self.height / 2) as i32,
             Rgba(self.color),
         );
+    }
+}
+
+impl GaShape for Ellipse {
+    fn as_placeable(&self) -> &dyn Placeable {
+        self
     }
 }

@@ -4,4 +4,4 @@ mod rectangle;
 mod traits;
 
 pub use random::random_shape;
-pub use traits::PlaceableShape;
+pub use traits::GaShape;

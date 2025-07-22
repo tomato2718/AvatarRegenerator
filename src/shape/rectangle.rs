@@ -1,4 +1,4 @@
-use super::traits::{Placeable, PlaceableShape, Shape};
+use super::traits::{GaShape, Placeable, Shape};
 use image::Rgba;
 use imageproc::{drawing::draw_filled_rect_mut, rect::Rect};
 
@@ -19,12 +19,6 @@ impl Rectangle {
             z_index,
             color,
         }
-    }
-}
-
-impl PlaceableShape for Rectangle {
-    fn as_placeable(&self) -> &dyn Placeable {
-        self
     }
 }
 
@@ -60,5 +54,11 @@ impl Placeable for Rectangle {
             Rect::at(top, left).of_size(self.width, self.height),
             Rgba(self.color),
         );
+    }
+}
+
+impl GaShape for Rectangle {
+    fn as_placeable(&self) -> &dyn Placeable {
+        self
     }
 }
