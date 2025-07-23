@@ -51,4 +51,18 @@ impl Shape for GaShape {
             GaShape::Ellipse(ellipse) => ellipse.z_index(),
         }
     }
+
+    fn mutate(
+        &mut self,
+        center: (i32, i32),
+        width: u32,
+        height: u32,
+        z_index: u32,
+        color: [u8; 4],
+    ) {
+        match self {
+            GaShape::Rect(rectangle) => rectangle.mutate(center, width, height, z_index, color),
+            GaShape::Ellipse(ellipse) => ellipse.mutate(center, width, height, z_index, color),
+        };
+    }
 }

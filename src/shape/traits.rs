@@ -10,4 +10,6 @@ pub trait Shape {
     fn height(&self) -> u32;
 
     fn z_index(&self) -> u32;
+
+    fn mutate(&mut self, center: (i32, i32), width: u32, height: u32, z_index: u32, color: [u8; 4]);
 }

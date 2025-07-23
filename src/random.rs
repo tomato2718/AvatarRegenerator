@@ -80,8 +80,43 @@ pub fn crossover(a: &GaShape, b: &GaShape) -> GaShape {
     }
 }
 
-// TODO: To finish
-pub fn mutate(shape: &mut GaShape) {}
+pub fn mutate(shape: &mut GaShape) {
+    let seed = random::<u16>();
+    let (mut x, mut y) = shape.center();
+    let mut width = shape.width();
+    let mut height = shape.height();
+    let mut z_index = shape.z_index();
+    let [mut r, mut g, mut b, mut a] = shape.color();
+
+    if seed & 0b1 == 1 {
+        x = !x;
+    }
+    if seed & 0b10 == 1 {
+        y = !y;
+    }
+    if seed & 0b100 == 1 {
+        width = !width;
+    }
+    if seed & 0b1000 == 1 {
+        height = !height;
+    }
+    if seed & 0b10000 == 1 {
+        z_index = !z_index;
+    }
+    if seed & 0b100000 == 1 {
+        r = !r;
+    }
+    if seed & 0b1000000 == 1 {
+        g = !g;
+    }
+    if seed & 0b10000000 == 1 {
+        b = !b;
+    }
+    if seed & 0b100000000 == 1 {
+        a = !a;
+    }
+    shape.mutate((x, y), width, height, z_index, [r, g, b, a]);
+}
 
 pub fn random_u8() -> u8 {
     random()
