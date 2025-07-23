@@ -20,63 +20,48 @@ pub fn random_shape(boundary: (u32, u32)) -> GaShape {
     }
 }
 
-pub fn crossover(a: &GaShape, b: &GaShape) -> GaShape {
+pub fn crossover(shape_a: &GaShape, shape_b: &GaShape) -> GaShape {
     let seed = random::<u16>();
+    let (mut x, mut y) = shape_a.center();
+    let mut width = shape_a.width();
+    let mut height = shape_a.height();
+    let mut z_index = shape_a.z_index();
+    let [mut r, mut g, mut b, mut a] = shape_a.color();
 
-    let center = (
-        if seed & 0b1 != 0 {
-            a.center().0
-        } else {
-            b.center().0
-        },
-        if seed & 0b10 != 0 {
-            a.center().1
-        } else {
-            b.center().1
-        },
-    );
-    let width = if seed & 0b100 != 0 {
-        a.width()
-    } else {
-        b.width()
-    };
-    let height = if seed & 0b1000 != 0 {
-        a.height()
-    } else {
-        b.height()
-    };
-    let z_index = if seed & 0b10000 != 0 {
-        a.z_index()
-    } else {
-        b.z_index()
-    };
-    let color = [
-        if seed & 0b100000 != 0 {
-            a.color()[0]
-        } else {
-            b.color()[0]
-        },
-        if seed & 0b1000000 != 0 {
-            a.color()[1]
-        } else {
-            b.color()[1]
-        },
-        if seed & 0b10000000 != 0 {
-            a.color()[2]
-        } else {
-            b.color()[2]
-        },
-        if seed & 0b100000000 != 0 {
-            a.color()[3]
-        } else {
-            b.color()[3]
-        },
-    ];
-    match a {
+    if seed & 0b1 == 1 {
+        x = shape_b.center().0;
+    }
+    if seed & 0b10 == 1 {
+        y = shape_b.center().1;
+    }
+    if seed & 0b100 == 1 {
+        width = shape_b.width();
+    }
+    if seed & 0b1000 == 1 {
+        height = shape_b.height();
+    }
+    if seed & 0b10000 == 1 {
+        z_index = shape_b.z_index();
+    }
+    if seed & 0b100000 == 1 {
+        r = shape_b.color()[0];
+    }
+    if seed & 0b1000000 == 1 {
+        g = shape_b.color()[1];
+    }
+    if seed & 0b10000000 == 1 {
+        b = shape_b.color()[2];
+    }
+    if seed & 0b100000000 == 1 {
+        a = shape_b.color()[3];
+    }
+    match shape_a {
         GaShape::Ellipse(_) => {
-            GaShape::Ellipse(Ellipse::new(center, width, height, z_index, color))
+            GaShape::Ellipse(Ellipse::new((x, y), width, height, z_index, [r, g, b, a]))
         }
-        GaShape::Rect(_) => GaShape::Rect(Rectangle::new(center, width, height, z_index, color)),
+        GaShape::Rect(_) => {
+            GaShape::Rect(Rectangle::new((x, y), width, height, z_index, [r, g, b, a]))
+        }
     }
 }
 
