@@ -6,7 +6,7 @@ pub struct GeneticAlgorithm<DataType: Copy> {
     crossover: fn(&DataType, &DataType) -> DataType,
     mutation_rate: u8,
     mutation: fn(&mut DataType),
-    calculate_fitness: fn(&DataType) -> u8,
+    calculate_fitness: fn(&DataType) -> u32,
     random: fn() -> u8,
 }
 
@@ -16,7 +16,7 @@ impl<DataType: Copy> GeneticAlgorithm<DataType> {
         crossover_function: fn(&DataType, &DataType) -> DataType,
         mutation_rate: u8,
         mutation_function: fn(&mut DataType),
-        fitness_function: fn(&DataType) -> u8,
+        fitness_function: fn(&DataType) -> u32,
         random: fn() -> u8,
     ) -> Self {
         GeneticAlgorithm::<DataType> {
@@ -45,7 +45,7 @@ impl<DataType: Copy> GeneticAlgorithm<DataType> {
                 .try_crossover(&population[a.1], &population[b.1])
                 .and_then(|mut child| Some(*self.try_mutate(&mut child)));
             if let Some(c) = child {
-                let score = (self.calculate_fitness)(&c) ^ 0xff;
+                let score = !(self.calculate_fitness)(&c);
                 processed.push((score, population.len()));
                 population.push(c);
             }
@@ -58,10 +58,10 @@ impl<DataType: Copy> GeneticAlgorithm<DataType> {
         from_fn(|_| population[heap.pop().unwrap().1])
     }
 
-    fn create_fitness_heap(&self, population: &[DataType]) -> BinaryHeap<(u8, usize)> {
-        let mut heap = BinaryHeap::<(u8, usize)>::new();
+    fn create_fitness_heap(&self, population: &[DataType]) -> BinaryHeap<(u32, usize)> {
+        let mut heap = BinaryHeap::<(u32, usize)>::new();
         for (index, member) in population.iter().enumerate() {
-            let score = (self.calculate_fitness)(&member) ^ 0xff;
+            let score = !(self.calculate_fitness)(&member);
             heap.push((score, index));
         }
         heap
@@ -96,8 +96,8 @@ mod test {
 
     type FakeDataType = [u8; 4];
 
-    fn fitness(data: &FakeDataType) -> u8 {
-        data.iter().fold(0, |acc, x| acc + x / 4)
+    fn fitness(data: &FakeDataType) -> u32 {
+        data.iter().fold(0, |acc, x| acc + x) as u32
     }
 
     fn crossover(a: &FakeDataType, b: &FakeDataType) -> FakeDataType {
