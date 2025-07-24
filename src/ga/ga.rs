@@ -1,25 +1,25 @@
 use std::array::from_fn;
 use std::collections::BinaryHeap;
 
-pub struct GeneticAlgorithm<DataType: Copy> {
+pub struct GeneticAlgorithm<'a, Individual> {
     crossover_rate: u8,
-    crossover: fn(&DataType, &DataType) -> DataType,
+    crossover: fn(&Individual, &Individual) -> Individual,
     mutation_rate: u8,
-    mutation: fn(&mut DataType),
-    calculate_fitness: fn(&DataType) -> u32,
+    mutation: fn(&mut Individual),
+    calculate_fitness: &'a dyn Fn(&Individual) -> u32,
     random: fn() -> u8,
 }
 
-impl<DataType: Copy> GeneticAlgorithm<DataType> {
+impl<'a, Individual> GeneticAlgorithm<'a, Individual> {
     pub fn new(
         crossover_rate: u8,
-        crossover_function: fn(&DataType, &DataType) -> DataType,
+        crossover_function: fn(&Individual, &Individual) -> Individual,
         mutation_rate: u8,
-        mutation_function: fn(&mut DataType),
-        fitness_function: fn(&DataType) -> u32,
+        mutation_function: fn(&mut Individual),
+        fitness_function: &'a dyn Fn(&Individual) -> u32,
         random: fn() -> u8,
     ) -> Self {
-        GeneticAlgorithm::<DataType> {
+        GeneticAlgorithm::<Individual> {
             crossover_rate,
             crossover: crossover_function,
             mutation_rate,
@@ -31,9 +31,9 @@ impl<DataType: Copy> GeneticAlgorithm<DataType> {
 
     pub fn execute<const S: usize>(
         &self,
-        population: [DataType; S],
+        population: [Individual; S],
         elite_count: usize,
-    ) -> [DataType; S] {
+    ) -> [Individual; S] {
         let mut population = Vec::from(population);
         let mut heap = self.create_fitness_heap(&population);
 
@@ -43,7 +43,10 @@ impl<DataType: Copy> GeneticAlgorithm<DataType> {
             let (a, b) = (heap.pop().unwrap(), heap.pop().unwrap());
             let child = self
                 .try_crossover(&population[a.1], &population[b.1])
-                .and_then(|mut child| Some(*self.try_mutate(&mut child)));
+                .and_then(|mut child| {
+                    self.try_mutate(&mut child);
+                    Some(child)
+                });
             if let Some(c) = child {
                 let score = !(self.calculate_fitness)(&c);
                 processed.push((score, population.len()));
@@ -55,10 +58,14 @@ impl<DataType: Copy> GeneticAlgorithm<DataType> {
         }
         processed.iter().for_each(|c| heap.push(*c));
 
-        from_fn(|_| population[heap.pop().unwrap().1])
+        let mut to_remove: [usize; S] = from_fn(|_| heap.pop().unwrap().1);
+        to_remove.sort_by(|a, b| b.cmp(a));
+        from_fn(|i| {
+            population.swap_remove(to_remove[i])
+        })
     }
 
-    fn create_fitness_heap(&self, population: &[DataType]) -> BinaryHeap<(u32, usize)> {
+    fn create_fitness_heap(&self, population: &[Individual]) -> BinaryHeap<(u32, usize)> {
         let mut heap = BinaryHeap::<(u32, usize)>::new();
         for (index, member) in population.iter().enumerate() {
             let score = !(self.calculate_fitness)(&member);
@@ -74,7 +81,7 @@ impl<DataType: Copy> GeneticAlgorithm<DataType> {
         count
     }
 
-    fn try_crossover(&self, a: &DataType, b: &DataType) -> Option<DataType> {
+    fn try_crossover(&self, a: &Individual, b: &Individual) -> Option<Individual> {
         if (self.random)() < self.crossover_rate {
             Some((self.crossover)(a, b))
         } else {
@@ -82,7 +89,7 @@ impl<DataType: Copy> GeneticAlgorithm<DataType> {
         }
     }
 
-    fn try_mutate<'a>(&self, child: &'a mut DataType) -> &'a DataType {
+    fn try_mutate<'b>(&self, child: &'b mut Individual) -> &'b Individual {
         if (self.random)() < self.mutation_rate {
             (self.mutation)(child);
         }
@@ -110,8 +117,8 @@ mod test {
         data.iter_mut().for_each(|v| *v ^= 0xff);
     }
 
-    fn create_ga_instance() -> GeneticAlgorithm<FakeDataType> {
-        GeneticAlgorithm::new(230, crossover, 23, mutate, fitness, || 220)
+    fn create_ga_instance() -> GeneticAlgorithm<'static, FakeDataType> {
+        GeneticAlgorithm::new(230, crossover, 23, mutate, &fitness, || 220)
     }
 
     #[test]
