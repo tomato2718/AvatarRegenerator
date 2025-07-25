@@ -12,8 +12,10 @@ pub trait Shape {
     fn z_index(&self) -> u32;
 }
 
-pub trait Chromosome: Shape + Copy {
+pub trait Chromosome: Shape {
     fn place(&self, image: &mut RgbaImage);
 
     fn mutate(&mut self);
+
+    fn crossover(&self, mate: &dyn Shape) -> impl Chromosome;
 }

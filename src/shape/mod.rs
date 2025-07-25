@@ -1,8 +1,9 @@
 mod ellipse;
-mod gene_edit;
 mod rectangle;
-// mod shape;
+mod shape;
+mod traits;
 
 pub use ellipse::Ellipse;
 pub use rectangle::Rectangle;
-// pub use shape::GaShape;
+pub use shape::GaShape;
+pub use traits::Shape;

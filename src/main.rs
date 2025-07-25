@@ -1,5 +1,5 @@
-// use avaregen::run;
+use avaregen::run;
 
 fn main() {
-    // run();
+    run();
 }

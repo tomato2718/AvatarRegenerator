@@ -20,7 +20,7 @@ impl<'a> ImageFitness<'a> {
                     .map(|(a, b)| (*a as i32 - *b as i32).abs() as u32)
                     .sum::<u32>();
         }
-        score / (target.width() * target.height() / 0xff)
+        score
     }
 }
 

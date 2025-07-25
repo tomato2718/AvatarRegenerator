@@ -16,26 +16,6 @@ impl<T: Chromosome, const S: usize> Canvas<T, S> {
         }
     }
 
-    pub fn mutate(&mut self, seed: usize) {
-        let i = seed % S;
-        self.chromosomes[i].mutate();
-    }
-
-    pub fn crossover(&self, mate: Canvas<T, S>) -> Self {
-        let new_chromosomes: [T; S] = std::array::from_fn(|index| {
-            if index & 1 == 1 {
-                self.chromosomes[index].clone()
-            } else {
-                mate.chromosomes[index].clone()
-            }
-        });
-        Canvas {
-            width: self.width,
-            height: self.height,
-            chromosomes: new_chromosomes,
-        }
-    }
-
     pub fn save(&self, path: &str) {
         self.to_image()
             .save_with_format(path, ImageFormat::Png)
@@ -44,17 +24,7 @@ impl<T: Chromosome, const S: usize> Canvas<T, S> {
 
     pub fn to_image(&self) -> RgbaImage {
         let mut image = RgbaImage::new(self.width, self.height);
-        let mut indices: Vec<(usize, u32)> = self
-            .chromosomes
-            .iter()
-            .enumerate()
-            .map(|(i, c)| (i, c.z_index()))
-            .collect();
-        indices.sort_by(|a, b| a.1.cmp(&b.1));
-        indices.iter().for_each(|(index, _)| {
-            let chromosome = self.chromosomes.get(*index).unwrap();
-            chromosome.place(&mut image);
-        });
+        self.chromosomes.iter().for_each(|c| c.place(&mut image));
         image
     }
 }
@@ -66,7 +36,6 @@ mod test {
     use image::Rgba;
     use imageproc::drawing::draw_filled_circle_mut;
 
-    #[derive(Clone, Copy)]
     struct FakeShape {}
 
     impl Shape for FakeShape {
@@ -92,12 +61,13 @@ mod test {
     }
 
     impl Chromosome for FakeShape {
+        fn mutate(&mut self) {}
+
+        fn crossover(&self, mate: &dyn Shape) -> impl Chromosome {
+            FakeShape {}
+        }
         fn place(&self, image: &mut RgbaImage) {
             draw_filled_circle_mut(image, (64, 64), 8, Rgba([255, 0, 0, 255]));
-        }
-
-        fn mutate(&mut self) {
-            
         }
     }
 

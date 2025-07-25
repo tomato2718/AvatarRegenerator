@@ -1,5 +1,7 @@
+use super::traits::{Placeable, Shape};
 use super::{ellipse::Ellipse, rectangle::Rectangle};
 
+#[derive(Clone, Copy)]
 pub enum GaShape {
     Rect(Rectangle),
     Ellipse(Ellipse),
