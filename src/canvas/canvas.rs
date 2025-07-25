@@ -39,7 +39,7 @@ mod test {
     struct FakeShape {}
 
     impl Shape for FakeShape {
-        fn center(&self) -> (i32, i32) {
+        fn center(&self) -> (u32, u32) {
             (64, 64)
         }
 

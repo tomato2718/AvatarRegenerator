@@ -3,7 +3,7 @@ use image::RgbaImage;
 pub trait Shape {
     fn color(&self) -> [u8; 4];
 
-    fn center(&self) -> (i32, i32);
+    fn center(&self) -> (u32, u32);
 
     fn width(&self) -> u32;
 
