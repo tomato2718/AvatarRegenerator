@@ -19,7 +19,7 @@ impl Ellipse {
                 max(self.gene.center.0, boundary.0),
                 max(self.gene.center.1, boundary.1),
             )
-            .with_radii(self.gene.width / 2, self.gene.height / 2)
+            .with_radii(max(self.gene.width / 2, 1), max(self.gene.height / 2, 1))
             .with_fill(Rgba::new(
                 self.gene.color[0],
                 self.gene.color[1],
