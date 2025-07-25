@@ -21,7 +21,7 @@ impl<T: Chromosome, const S: usize> Canvas<T, S> {
         self.chromosomes[i].mutate();
     }
 
-    pub fn crossover(&self, mate: Canvas<T, S>) -> Self {
+    pub fn crossover(&self, mate: &Canvas<T, S>) -> Self {
         let new_chromosomes: [T; S] = std::array::from_fn(|index| {
             if index & 1 == 1 {
                 self.chromosomes[index].clone()
