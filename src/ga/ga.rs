@@ -60,9 +60,7 @@ impl<'a, Individual> GeneticAlgorithm<'a, Individual> {
 
         let mut to_remove: [usize; S] = from_fn(|_| heap.pop().unwrap().1);
         to_remove.sort_by(|a, b| b.cmp(a));
-        from_fn(|i| {
-            population.swap_remove(to_remove[i])
-        })
+        from_fn(|i| population.swap_remove(to_remove[i]))
     }
 
     fn create_fitness_heap(&self, population: &[Individual]) -> BinaryHeap<(u32, usize)> {
