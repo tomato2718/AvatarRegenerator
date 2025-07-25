@@ -1,10 +1,22 @@
 use super::traits::Chromosome;
+use crate::ga::Cacheable;
 use ril::{Image, ImageFormat, OverlayMode, Rgba};
 
 pub struct Canvas<T: Chromosome, const S: usize> {
     width: u32,
     height: u32,
     chromosomes: [T; S],
+    fitness: Option<u32>,
+}
+
+impl<T: Chromosome, const S: usize> Cacheable for Canvas<T, S> {
+    fn get_fitness(&self) -> &Option<u32> {
+        &self.fitness
+    }
+
+    fn set_fitness(&mut self, fitness: u32) {
+        self.fitness = Some(fitness);
+    }
 }
 
 impl<T: Chromosome, const S: usize> Canvas<T, S> {
@@ -13,12 +25,14 @@ impl<T: Chromosome, const S: usize> Canvas<T, S> {
             width,
             height,
             chromosomes,
+            fitness: None,
         }
     }
 
     pub fn mutate(&mut self, seed: usize) {
         let i = seed % S;
         self.chromosomes[i].mutate();
+        self.fitness = None;
     }
 
     pub fn crossover(&self, mate: &Canvas<T, S>) -> Self {
@@ -29,11 +43,7 @@ impl<T: Chromosome, const S: usize> Canvas<T, S> {
                 mate.chromosomes[index].clone()
             }
         });
-        Canvas {
-            width: self.width,
-            height: self.height,
-            chromosomes: new_chromosomes,
-        }
+        Canvas::new(self.width, self.height, new_chromosomes)
     }
 
     pub fn save(&self, path: &str) {

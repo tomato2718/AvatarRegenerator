@@ -8,7 +8,7 @@ use std::array;
 
 const POPULATION_SIZE: usize = 20;
 const ELITE_COUNT: usize = 18;
-const CHROMOSOME_COUNT: usize = 300;
+const CHROMOSOME_COUNT: usize = 100;
 const CROSSOVER_RATE: u8 = 220;
 const MUTATION_RATE: u8 = 20;
 const ITERATIONS: usize = 5000;

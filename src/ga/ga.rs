@@ -1,16 +1,17 @@
+use super::Cacheable;
 use std::array::from_fn;
 use std::collections::BinaryHeap;
 
-pub struct GeneticAlgorithm<'a, Individual> {
+pub struct GeneticAlgorithm<'a, Individual: Cacheable> {
     crossover_rate: u8,
     crossover: fn(&Individual, &Individual) -> Individual,
     mutation_rate: u8,
     mutation: fn(&mut Individual),
-    calculate_fitness: &'a dyn Fn(&Individual) -> u32,
+    fitness: &'a dyn Fn(&Individual) -> u32,
     random: fn() -> u8,
 }
 
-impl<'a, Individual> GeneticAlgorithm<'a, Individual> {
+impl<'a, Individual: Cacheable> GeneticAlgorithm<'a, Individual> {
     pub fn new(
         crossover_rate: u8,
         crossover_function: fn(&Individual, &Individual) -> Individual,
@@ -24,7 +25,7 @@ impl<'a, Individual> GeneticAlgorithm<'a, Individual> {
             crossover: crossover_function,
             mutation_rate,
             mutation: mutation_function,
-            calculate_fitness: fitness_function,
+            fitness: fitness_function,
             random,
         }
     }
@@ -35,7 +36,7 @@ impl<'a, Individual> GeneticAlgorithm<'a, Individual> {
         elite_count: usize,
     ) -> [Individual; S] {
         let mut population = Vec::from(population);
-        let mut heap = self.create_fitness_heap(&population);
+        let mut heap = self.create_fitness_heap(&mut population);
 
         let mut elite_count = self.ensure_elite_count(elite_count);
         let mut processed = vec![];
@@ -47,8 +48,8 @@ impl<'a, Individual> GeneticAlgorithm<'a, Individual> {
                     self.try_mutate(&mut child);
                     Some(child)
                 });
-            if let Some(c) = child {
-                let score = !(self.calculate_fitness)(&c);
+            if let Some(mut c) = child {
+                let score = self.calculate_fitness(&mut c);
                 processed.push((score, population.len()));
                 population.push(c);
             }
@@ -63,10 +64,10 @@ impl<'a, Individual> GeneticAlgorithm<'a, Individual> {
         from_fn(|i| population.swap_remove(to_remove[i]))
     }
 
-    fn create_fitness_heap(&self, population: &[Individual]) -> BinaryHeap<(u32, usize)> {
+    fn create_fitness_heap(&self, population: &mut [Individual]) -> BinaryHeap<(u32, usize)> {
         let mut heap = BinaryHeap::<(u32, usize)>::new();
-        for (index, member) in population.iter().enumerate() {
-            let score = !(self.calculate_fitness)(&member);
+        for (index, member) in population.iter_mut().enumerate() {
+            let score = self.calculate_fitness(member);
             heap.push((score, index));
         }
         heap
@@ -93,26 +94,46 @@ impl<'a, Individual> GeneticAlgorithm<'a, Individual> {
         }
         child
     }
+
+    fn calculate_fitness(&self, individual: &mut Individual) -> u32 {
+        match individual.get_fitness() {
+            Some(score) => *score,
+            None => {
+                let score = !(self.fitness)(&individual);
+                individual.set_fitness(score);
+                score
+            }
+        }
+    }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
 
-    type FakeDataType = [u8; 4];
+    #[derive(Clone, Copy)]
+    struct FakeDataType(pub [u8; 4]);
+
+    impl Cacheable for FakeDataType {
+        fn get_fitness(&self) -> &Option<u32> {
+            &None
+        }
+
+        fn set_fitness(&mut self, fitness: u32) {}
+    }
 
     fn fitness(data: &FakeDataType) -> u32 {
-        data.iter().fold(0, |acc, x| acc + x) as u32
+        data.0.iter().fold(0, |acc, x| acc + x) as u32
     }
 
     fn crossover(a: &FakeDataType, b: &FakeDataType) -> FakeDataType {
         let mut child = a.clone();
-        child[2..].copy_from_slice(&b[2..]);
+        child.0[2..].copy_from_slice(&b.0[2..]);
         child
     }
 
     fn mutate<'a>(data: &'a mut FakeDataType) {
-        data.iter_mut().for_each(|v| *v ^= 0xff);
+        data.0.iter_mut().for_each(|v| *v ^= 0xff);
     }
 
     fn create_ga_instance() -> GeneticAlgorithm<'static, FakeDataType> {
@@ -121,28 +142,25 @@ mod test {
 
     #[test]
     fn execute_given_population_should_return_evolved_generation() {
-        let population: [FakeDataType; 4] = vec![
-            vec![5, 5, 0, 0].try_into().unwrap(),
-            vec![0, 0, 3, 3].try_into().unwrap(),
-            vec![4, 5, 6, 7].try_into().unwrap(),
-            vec![5, 6, 7, 8].try_into().unwrap(),
-        ]
-        .try_into()
-        .unwrap();
-        let mut expect: [FakeDataType; 4] = vec![
-            vec![0, 0, 0, 0].try_into().unwrap(),
-            vec![0, 0, 3, 3].try_into().unwrap(),
-            vec![5, 5, 0, 0].try_into().unwrap(),
-            vec![4, 5, 6, 7].try_into().unwrap(),
-        ]
-        .try_into()
-        .unwrap();
+        let population: [FakeDataType; 4] = [
+            FakeDataType([5, 5, 0, 0]),
+            FakeDataType([0, 0, 3, 3]),
+            FakeDataType([4, 5, 6, 7]),
+            FakeDataType([5, 6, 7, 8]),
+        ];
+
+        let mut expect: [FakeDataType; 4] = [
+            FakeDataType([0, 0, 0, 0]),
+            FakeDataType([0, 0, 3, 3]),
+            FakeDataType([5, 5, 0, 0]),
+            FakeDataType([4, 5, 6, 7]),
+        ];
         let ga = create_ga_instance();
 
         let mut new_gen = ga.execute(population, 2);
 
-        new_gen.sort();
-        expect.sort();
-        assert_eq!(new_gen, expect);
+        new_gen.sort_by(|a, b| a.0.cmp(&b.0));
+        expect.sort_by(|a, b| a.0.cmp(&b.0));
+        assert_eq!(new_gen.map(|c| c.0), expect.map(|c| c.0));
     }
 }
