@@ -1,8 +1,8 @@
 mod args;
 mod canvas;
-mod core;
+// mod core;
 mod ga;
-mod image2ga;
-mod shape;
+// mod image2ga;
+// mod shape;
 
-pub use core::run;
+// pub use core::run;
