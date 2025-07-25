@@ -1,51 +1,82 @@
-use super::traits::Placeable;
-use image::{ColorType, DynamicImage, GenericImageView, ImageFormat};
+use super::traits::Chromosome;
+use image::{ImageFormat, RgbaImage};
 
-pub struct Canvas {
-    image: DynamicImage,
+pub struct Canvas<T: Chromosome, const S: usize> {
+    width: u32,
+    height: u32,
+    chromosomes: [T; S],
 }
 
-impl Canvas {
-    pub fn new(width: u32, height: u32) -> Self {
+impl<T: Chromosome, const S: usize> Canvas<T, S> {
+    pub fn new(width: u32, height: u32, chromosomes: [T; S]) -> Self {
         Canvas {
-            image: DynamicImage::new(width, height, ColorType::Rgba8),
+            width,
+            height,
+            chromosomes,
         }
     }
 
-    pub fn get_pixel(&self, x: u32, y: u32) -> [u8; 4] {
-        self.image.get_pixel(x, y).0
-    }
-
-    pub fn draw(&mut self, shape: &dyn Placeable) {
-        shape.place(&mut self.image);
-    }
-
     pub fn save(&self, path: &str) {
-        self.image.save_with_format(path, ImageFormat::Png).unwrap();
+        self.to_image()
+            .save_with_format(path, ImageFormat::Png)
+            .unwrap();
+    }
+
+    pub fn to_image(&self) -> RgbaImage {
+        let mut image = RgbaImage::new(self.width, self.height);
+        self.chromosomes.iter().for_each(|c| c.place(&mut image));
+        image
     }
 }
 
 #[cfg(test)]
 mod test {
+    use super::super::traits::Shape;
     use super::*;
     use image::Rgba;
     use imageproc::drawing::draw_filled_circle_mut;
 
     struct FakeShape {}
 
-    impl Placeable for FakeShape {
-        fn place(&self, image: &mut DynamicImage) {
-            draw_filled_circle_mut(image, (64, 64), 8, Rgba([255, 0, 0, 100]));
+    impl Shape for FakeShape {
+        fn center(&self) -> (i32, i32) {
+            (64, 64)
+        }
+
+        fn width(&self) -> u32 {
+            8
+        }
+
+        fn height(&self) -> u32 {
+            8
+        }
+
+        fn z_index(&self) -> u32 {
+            0
+        }
+
+        fn color(&self) -> [u8; 4] {
+            [255, 0, 0, 255]
+        }
+    }
+
+    impl Chromosome for FakeShape {
+        fn mutate(&mut self) {}
+
+        fn crossover(&self, mate: &dyn Shape) -> impl Chromosome {
+            FakeShape {}
+        }
+        fn place(&self, image: &mut RgbaImage) {
+            draw_filled_circle_mut(image, (64, 64), 8, Rgba([255, 0, 0, 255]));
         }
     }
 
     #[test]
-    fn draw_given_shape_draw_on_canvas() {
-        let mut canvas = Canvas::new(128, 128);
-        let shape = FakeShape {};
+    fn to_image_should_return_painted_rgba_image() {
+        let canvas = Canvas::new(128, 128, [FakeShape {}]);
 
-        canvas.draw(&shape);
+        let image = canvas.to_image();
 
-        assert_eq!(canvas.get_pixel(64, 64), [255, 0, 0, 100]);
+        assert_eq!(image.get_pixel(64, 64).0, [255, 0, 0, 255]);
     }
 }
