@@ -3,7 +3,7 @@ use crate::fitness::ImageFitness;
 use crate::ga::GeneticAlgorithm;
 use crate::random::{random_shape, random_u8, random_u32};
 use crate::shape::GaShape;
-use image::open;
+use ril::{Image, Rgba};
 use std::array;
 
 const POPULATION_SIZE: usize = 20;
@@ -15,7 +15,7 @@ const ITERATIONS: usize = 5000;
 const MAX_SHAPE_SIZE: u32 = 64;
 
 pub fn run() {
-    let image = open("./sample/rickroll.jpg").unwrap().to_rgba8();
+    let image = Image::<Rgba>::open("./sample/rickroll.jpg").unwrap();
     let fitness = ImageFitness::new(&image);
     let fitness_wrapper = |c: &Canvas<GaShape, CHROMOSOME_COUNT>| fitness.calculate(&c.to_image());
     let ga = GeneticAlgorithm::<Canvas<GaShape, CHROMOSOME_COUNT>>::new(

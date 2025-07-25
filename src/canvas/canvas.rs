@@ -1,5 +1,5 @@
 use super::traits::Chromosome;
-use image::{ImageFormat, RgbaImage};
+use ril::{Image, ImageFormat, OverlayMode, Rgba};
 
 pub struct Canvas<T: Chromosome, const S: usize> {
     width: u32,
@@ -37,13 +37,21 @@ impl<T: Chromosome, const S: usize> Canvas<T, S> {
     }
 
     pub fn save(&self, path: &str) {
-        self.to_image()
-            .save_with_format(path, ImageFormat::Png)
-            .unwrap();
+        self.to_image().save(ImageFormat::Png, path).unwrap();
     }
 
-    pub fn to_image(&self) -> RgbaImage {
-        let mut image = RgbaImage::new(self.width, self.height);
+    pub fn to_image(&self) -> Image<Rgba> {
+        let mut image = Image::<Rgba>::new(
+            self.width,
+            self.height,
+            Rgba {
+                r: 0,
+                g: 0,
+                b: 0,
+                a: 0,
+            },
+        )
+        .with_overlay_mode(OverlayMode::Merge);
         self.chromosomes.iter().for_each(|c| c.place(&mut image));
         image
     }
@@ -52,15 +60,18 @@ impl<T: Chromosome, const S: usize> Canvas<T, S> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use image::Rgba;
-    use imageproc::drawing::draw_filled_circle_mut;
+    use ril::{Image, Rgba, draw::Ellipse};
 
     #[derive(Clone, Copy)]
     struct FakeShape {}
 
     impl Chromosome for FakeShape {
-        fn place(&self, image: &mut RgbaImage) {
-            draw_filled_circle_mut(image, (64, 64), 8, Rgba([255, 0, 0, 255]));
+        fn place(&self, image: &mut Image<Rgba>) {
+            let shape = Ellipse::new()
+                .with_position(64, 64)
+                .with_radii(8, 8)
+                .with_fill(Rgba::new(255, 0, 0, 255));
+            image.draw(&shape);
         }
 
         fn mutate(&mut self) {}
@@ -72,6 +83,6 @@ mod test {
 
         let image = canvas.to_image();
 
-        assert_eq!(image.get_pixel(64, 64).0, [255, 0, 0, 255]);
+        assert_eq!(image.get_pixel(64, 64).unwrap(), &Rgba::new(255, 0, 0, 255));
     }
 }

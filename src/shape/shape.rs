@@ -1,5 +1,6 @@
 use super::{ellipse::Ellipse, rectangle::Rectangle};
 use crate::canvas::Chromosome;
+use ril::{Image, Rgba};
 
 #[derive(Clone, Copy)]
 pub enum GaShape {
@@ -15,7 +16,7 @@ impl Chromosome for GaShape {
         }
     }
 
-    fn place(&self, image: &mut image::RgbaImage) {
+    fn place(&self, image: &mut Image<Rgba>) {
         match self {
             GaShape::Rect(rectangle) => rectangle.place(image),
             GaShape::Ellipse(ellipse) => ellipse.place(image),

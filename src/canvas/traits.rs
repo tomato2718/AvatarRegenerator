@@ -1,7 +1,7 @@
-use image::RgbaImage;
+use ril::{Image, Rgba};
 
 pub trait Chromosome: Copy {
-    fn place(&self, image: &mut RgbaImage);
+    fn place(&self, image: &mut Image<Rgba>);
 
     fn mutate(&mut self);
 }

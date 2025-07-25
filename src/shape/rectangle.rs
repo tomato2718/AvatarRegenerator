@@ -1,6 +1,5 @@
 use super::gene::Gene;
-use image::{Rgba, RgbaImage};
-use imageproc::{drawing::draw_filled_rect_mut, rect::Rect};
+use ril::{Image, Rgba};
 
 #[derive(Clone, Copy)]
 pub struct Rectangle {
@@ -12,15 +11,19 @@ impl Rectangle {
         Rectangle { gene }
     }
 
-    pub fn place(&self, image: &mut RgbaImage) {
+    pub fn place(&self, image: &mut Image<Rgba>) {
         let (x, y) = self.gene.center;
-        let top = i32::abs(x as i32 - (self.gene.width / 2) as i32);
-        let left = i32::abs(y as i32 - (self.gene.height / 2) as i32);
-        draw_filled_rect_mut(
-            image,
-            Rect::at(top, left).of_size(self.gene.width, self.gene.height),
-            Rgba(self.gene.color),
-        );
+        let top = x.saturating_sub(self.gene.width / 2);
+        let left = y.saturating_sub(self.gene.height / 2);
+        let shape = ril::Rectangle::at(top, left)
+            .with_size(self.gene.width, self.gene.height)
+            .with_fill(Rgba::new(
+                self.gene.color[0],
+                self.gene.color[1],
+                self.gene.color[2],
+                self.gene.color[3],
+            ));
+        image.draw(&shape);
     }
 
     pub fn mutate(&mut self) {
