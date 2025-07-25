@@ -44,24 +44,13 @@ impl<T: Chromosome, const S: usize> Canvas<T, S> {
 
     pub fn to_image(&self) -> RgbaImage {
         let mut image = RgbaImage::new(self.width, self.height);
-        let mut indices: Vec<(usize, u32)> = self
-            .chromosomes
-            .iter()
-            .enumerate()
-            .map(|(i, c)| (i, c.z_index()))
-            .collect();
-        indices.sort_by(|a, b| a.1.cmp(&b.1));
-        indices.iter().for_each(|(index, _)| {
-            let chromosome = self.chromosomes.get(*index).unwrap();
-            chromosome.place(&mut image);
-        });
+        self.chromosomes.iter().for_each(|c| c.place(&mut image));
         image
     }
 }
 
 #[cfg(test)]
 mod test {
-    use super::super::traits::Shape;
     use super::*;
     use image::Rgba;
     use imageproc::drawing::draw_filled_circle_mut;
@@ -69,36 +58,12 @@ mod test {
     #[derive(Clone, Copy)]
     struct FakeShape {}
 
-    impl Shape for FakeShape {
-        fn center(&self) -> (u32, u32) {
-            (64, 64)
-        }
-
-        fn width(&self) -> u32 {
-            8
-        }
-
-        fn height(&self) -> u32 {
-            8
-        }
-
-        fn z_index(&self) -> u32 {
-            0
-        }
-
-        fn color(&self) -> [u8; 4] {
-            [255, 0, 0, 255]
-        }
-    }
-
     impl Chromosome for FakeShape {
         fn place(&self, image: &mut RgbaImage) {
             draw_filled_circle_mut(image, (64, 64), 8, Rgba([255, 0, 0, 255]));
         }
 
-        fn mutate(&mut self) {
-            
-        }
+        fn mutate(&mut self) {}
     }
 
     #[test]

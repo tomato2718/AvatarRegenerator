@@ -2,4 +2,4 @@ mod canvas;
 mod traits;
 
 pub use canvas::Canvas;
-pub use traits::{Chromosome, Shape};
+pub use traits::Chromosome;
