@@ -1,73 +1,28 @@
-use super::traits::{Placeable, Shape};
-use image::Rgba;
+use super::gene::Gene;
+use image::{Rgba, RgbaImage};
 use imageproc::drawing::draw_filled_ellipse_mut;
 
 #[derive(Clone, Copy)]
 pub struct Ellipse {
-    center: (i32, i32),
-    width: u32,
-    height: u32,
-    z_index: u32,
-    color: [u8; 4],
+    gene: Gene,
 }
 
 impl Ellipse {
-    pub fn new(center: (i32, i32), width: u32, height: u32, z_index: u32, color: [u8; 4]) -> Self {
-        Ellipse {
-            center,
-            width,
-            height,
-            z_index,
-            color,
-        }
-    }
-}
-
-impl Shape for Ellipse {
-    fn color(&self) -> [u8; 4] {
-        self.color
+    pub fn new(gene: Gene) -> Self {
+        Ellipse { gene }
     }
 
-    fn center(&self) -> (i32, i32) {
-        self.center
-    }
-
-    fn width(&self) -> u32 {
-        self.width
-    }
-
-    fn height(&self) -> u32 {
-        self.height
-    }
-
-    fn z_index(&self) -> u32 {
-        self.z_index
-    }
-
-    fn mutate(
-        &mut self,
-        center: (i32, i32),
-        width: u32,
-        height: u32,
-        z_index: u32,
-        color: [u8; 4],
-    ) {
-        self.center = center;
-        self.width = width;
-        self.height = height;
-        self.z_index = z_index;
-        self.color = color;
-    }
-}
-
-impl Placeable for Ellipse {
-    fn place(&self, image: &mut image::DynamicImage) {
+    pub fn place(&self, image: &mut RgbaImage) {
         draw_filled_ellipse_mut(
             image,
-            self.center,
-            (self.width / 2) as i32,
-            (self.height / 2) as i32,
-            Rgba(self.color),
+            (self.gene.center.0 as i32, self.gene.center.1 as i32),
+            (self.gene.width / 2) as i32,
+            (self.gene.height / 2) as i32,
+            Rgba(self.gene.color),
         );
+    }
+
+    pub fn mutate(&mut self) {
+        self.gene.mutate();
     }
 }

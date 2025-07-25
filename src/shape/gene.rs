@@ -1,0 +1,22 @@
+#[derive(Clone, Copy)]
+pub struct Gene {
+    pub max_coord: (u32, u32),
+    pub max_width: u32,
+    pub mex_height: u32,
+    pub center: (u32, u32),
+    pub width: u32,
+    pub height: u32,
+    pub color: [u8; 4],
+}
+
+impl Gene {
+    pub fn mutate(&mut self) {
+        self.center = (
+            !self.center.0 % self.max_coord.0,
+            !self.center.1 % self.max_coord.1,
+        );
+        self.width = !self.width % self.max_width;
+        self.height = !self.height & self.mex_height;
+        self.color = self.color.map(|c| !c);
+    }
+}
