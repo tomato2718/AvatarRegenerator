@@ -5,4 +5,4 @@ mod ga;
 mod random;
 mod shape;
 
-pub use core::run;
+pub use core::{Arguments, run};
