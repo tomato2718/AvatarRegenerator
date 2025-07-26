@@ -1,5 +1,4 @@
 use super::Cacheable;
-use std::array::from_fn;
 use std::collections::BinaryHeap;
 
 pub struct GeneticAlgorithm<'a, Individual: Cacheable> {
@@ -30,12 +29,8 @@ impl<'a, Individual: Cacheable> GeneticAlgorithm<'a, Individual> {
         }
     }
 
-    pub fn execute<const S: usize>(
-        &self,
-        population: [Individual; S],
-        elite_count: usize,
-    ) -> [Individual; S] {
-        let mut population = Vec::from(population);
+    pub fn execute(&self, mut population: Vec<Individual>, elite_count: usize) -> Vec<Individual> {
+        let size = population.len();
         let mut heap = self.create_fitness_heap(&mut population);
 
         let mut elite_count = self.ensure_elite_count(elite_count);
@@ -59,12 +54,14 @@ impl<'a, Individual: Cacheable> GeneticAlgorithm<'a, Individual> {
         }
         processed.iter().for_each(|c| heap.push(*c));
 
-        let mut to_remove: [usize; S] = from_fn(|_| heap.pop().unwrap().1);
+        let mut to_remove: Vec<usize> = (0..size).map(|_| heap.pop().unwrap().1).collect();
         to_remove.sort_by(|a, b| b.cmp(a));
-        from_fn(|i| population.swap_remove(to_remove[i]))
+        (0..size)
+            .map(|i| population.swap_remove(to_remove[i]))
+            .collect()
     }
 
-    fn create_fitness_heap(&self, population: &mut [Individual]) -> BinaryHeap<(u32, usize)> {
+    fn create_fitness_heap(&self, population: &mut Vec<Individual>) -> BinaryHeap<(u32, usize)> {
         let mut heap = BinaryHeap::<(u32, usize)>::new();
         for (index, member) in population.iter_mut().enumerate() {
             let score = self.calculate_fitness(member);
@@ -142,14 +139,14 @@ mod test {
 
     #[test]
     fn execute_given_population_should_return_evolved_generation() {
-        let population: [FakeDataType; 4] = [
+        let population = vec![
             FakeDataType([5, 5, 0, 0]),
             FakeDataType([0, 0, 3, 3]),
             FakeDataType([4, 5, 6, 7]),
             FakeDataType([5, 6, 7, 8]),
         ];
 
-        let mut expect: [FakeDataType; 4] = [
+        let mut expect = vec![
             FakeDataType([0, 0, 0, 0]),
             FakeDataType([0, 0, 3, 3]),
             FakeDataType([5, 5, 0, 0]),
@@ -161,6 +158,10 @@ mod test {
 
         new_gen.sort_by(|a, b| a.0.cmp(&b.0));
         expect.sort_by(|a, b| a.0.cmp(&b.0));
-        assert_eq!(new_gen.map(|c| c.0), expect.map(|c| c.0));
+
+        assert_eq!(
+            new_gen.iter().map(|c| c.0).collect::<Vec<[u8; 4]>>(),
+            expect.iter().map(|c| c.0).collect::<Vec<[u8; 4]>>()
+        );
     }
 }

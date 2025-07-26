@@ -2,14 +2,14 @@ use super::traits::Chromosome;
 use crate::ga::Cacheable;
 use ril::{Image, ImageFormat, OverlayMode, Rgba};
 
-pub struct Canvas<T: Chromosome, const S: usize> {
+pub struct Canvas<T: Chromosome> {
     width: u32,
     height: u32,
-    chromosomes: [T; S],
+    chromosomes: Vec<T>,
     fitness: Option<u32>,
 }
 
-impl<T: Chromosome, const S: usize> Cacheable for Canvas<T, S> {
+impl<T: Chromosome> Cacheable for Canvas<T> {
     fn get_fitness(&self) -> &Option<u32> {
         &self.fitness
     }
@@ -19,8 +19,8 @@ impl<T: Chromosome, const S: usize> Cacheable for Canvas<T, S> {
     }
 }
 
-impl<T: Chromosome, const S: usize> Canvas<T, S> {
-    pub fn new(width: u32, height: u32, chromosomes: [T; S]) -> Self {
+impl<T: Chromosome> Canvas<T> {
+    pub fn new(width: u32, height: u32, chromosomes: Vec<T>) -> Self {
         Canvas {
             width,
             height,
@@ -30,19 +30,23 @@ impl<T: Chromosome, const S: usize> Canvas<T, S> {
     }
 
     pub fn mutate(&mut self, seed: usize) {
-        let i = seed % S;
+        let i = seed % self.chromosomes.len();
         self.chromosomes[i].mutate();
         self.fitness = None;
     }
 
-    pub fn crossover(&self, mate: &Canvas<T, S>) -> Self {
-        let new_chromosomes: [T; S] = std::array::from_fn(|index| {
-            if index & 1 == 1 {
-                self.chromosomes[index].clone()
-            } else {
-                mate.chromosomes[index].clone()
-            }
-        });
+    pub fn crossover(&self, mate: &Canvas<T>) -> Self {
+        let new_chromosomes = self
+            .chromosomes
+            .iter()
+            .zip(mate.chromosomes.iter())
+            .enumerate()
+            .map(
+                |(index, (a, b))| {
+                    if index & 1 == 1 { a.clone() } else { b.clone() }
+                },
+            )
+            .collect();
         Canvas::new(self.width, self.height, new_chromosomes)
     }
 
@@ -89,7 +93,7 @@ mod test {
 
     #[test]
     fn to_image_should_return_painted_rgba_image() {
-        let canvas = Canvas::new(128, 128, [FakeShape {}]);
+        let canvas = Canvas::new(128, 128, vec![FakeShape {}]);
 
         let image = canvas.to_image();
 
