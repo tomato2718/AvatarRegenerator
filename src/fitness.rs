@@ -2,11 +2,15 @@ use ril::{Image, Rgba};
 
 pub struct ImageFitness<'a> {
     base: &'a Image<Rgba>,
+    scale_ratio: u32,
 }
 
 impl<'a> ImageFitness<'a> {
     pub fn new(base: &'a Image<Rgba>) -> Self {
-        ImageFitness { base }
+        ImageFitness {
+            base,
+            scale_ratio: u32::MAX / base.width() / base.height() / (255 * 4),
+        }
     }
 
     pub fn calculate(&self, target: &Image<Rgba>) -> u32 {
@@ -21,7 +25,7 @@ impl<'a> ImageFitness<'a> {
                 score = score.saturating_add(base_pixel.a.abs_diff(target_pixel.a) as u32);
             }
         }
-        score
+        score * self.scale_ratio
     }
 }
 
@@ -55,6 +59,9 @@ mod test {
 
         let score = fitness.calculate(&target);
 
-        assert_eq!(score, 32 * 32 * 255 * 2);
+        assert_eq!(
+            score,
+            (32 * 32 * 255 * 2) * (u32::MAX / base.width() / base.height() / (255 * 4))
+        );
     }
 }
