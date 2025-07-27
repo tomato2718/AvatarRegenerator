@@ -1,3 +1,5 @@
+use rand::random;
+
 #[derive(Clone, Copy)]
 pub struct Gene {
     pub boundary: (u32, u32),
@@ -11,12 +13,13 @@ pub struct Gene {
 
 impl Gene {
     pub fn mutate(&mut self) {
+        let seed = random::<u32>();
         self.center = (
-            !self.center.0 % self.boundary.0,
-            !self.center.1 % self.boundary.1,
+            self.center.0.wrapping_add(seed & 0xff) % self.boundary.0,
+            self.center.1.wrapping_add(seed & 0xff00) % self.boundary.1,
         );
-        self.width = (!self.width % self.max_width) + 1;
-        self.height = (!self.height % self.mex_height) + 1;
-        self.color = self.color.map(|c| !c);
+        self.width = (self.width.wrapping_add(seed & 0xff0000) % self.max_width) + 1;
+        self.height = (self.height.wrapping_add(seed & 0xff000000) % self.mex_height) + 1;
+        self.color = self.color.map(|c| c.wrapping_add(random()));
     }
 }
