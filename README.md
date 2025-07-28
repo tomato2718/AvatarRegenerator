@@ -2,6 +2,8 @@
 
 Regenerate image using GA algorithm
 
+## Example 01
+
 Base Image:
 
 ![Base](./docs/tomato.png)
@@ -14,6 +16,11 @@ Animated iterations:
 
 ![Result](./docs/tomato-20k_iterations.png)
 
+## Example 02
+
+Another example with 100k iterations, 300 chromosomes, 100 mutations rate
+
+![Secret](./docs/another_example.gif)
 
 ## Features
 
